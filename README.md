@@ -14,9 +14,9 @@
 
 ## Abstract
 
-Event cameras (Dynamic Vision Sensors) offer microsecond-level temporal resolution and ultra-low power consumption, making them ideal sensors for long-endurance autonomous navigation. However, real-world DVS deployments suffer from **Event-Storm noise** — bursts of spurious events caused by lighting changes, sensor noise, and high-frequency environmental flickering — that overwhelm downstream Spiking Neural Networks (SNNs) and degrade Visual Place Recognition (VPR) accuracy (Hines et al., 2025).
+Event cameras (Dynamic Vision Sensors) offer microsecond-level temporal resolution and ultra-low power consumption, making them ideal sensors for long-endurance autonomous navigation. However, real-world DVS deployments suffer from Event-Storm noise which are bursts of spurious events caused by lighting changes, sensor noise, and high-frequency environmental flickering that overwhelm downstream Spiking Neural Networks (SNNs) and degrade Visual Place Recognition (VPR) accuracy (Hines et al., 2025).
 
-**NET** investigates a bio-inspired **Spatio-Temporal Poisson Filter** with an **adaptive feedback controller** that mimics biological retinal filtering. By dynamically triaging event streams in real-time, NET protects downstream localization models from data saturation during noise bursts, ensuring robust performance in high-entropy environments.
+NET investigates a bio-inspired Spatio-Temporal Poisson Filter with an adaptive feedback controller that mimics biological retinal filtering. By dynamically triaging event streams in real-time, NET protects downstream localization models from data saturation during noise bursts, ensuring robust performance in high-entropy environments.
 
 ## Key Results
 
@@ -61,7 +61,7 @@ _Figure: The controller (Pink) steps up $K$ when Event Density (Blue) exceeds th
 ## Installation
 
 ```bash
-git clone https://github.com/JonathanSetiawan/NET-VPR.git
+git clone https://github.com/Cronenberg64/NET-VPR.git
 cd NET-VPR
 pip install -r requirements.txt
 ```
