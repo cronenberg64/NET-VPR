@@ -1,6 +1,6 @@
 """
-NET: Neuromorphic Event Triage — Final Benchmark (Phase 5)
-==========================================================
+NET: Neuromorphic Event Triage — Final Benchmark
+================================================
 
 Compares:
 1. Static NET (K=2)
@@ -12,7 +12,7 @@ Metrics:
 - SNR (dB)
 - Reduction (%)
 - Signal Preservation (%)
-- Energy Efficiency (Theoretical, relative to baseline)
+- Energy Efficiency (Theoretical)
 
 Outputs:
 - Console table
@@ -32,7 +32,7 @@ from src.controller import AdaptiveEventController
 
 def run_benchmark():
     print("=" * 64)
-    print("  NET Phase 5: The Thesis — Final Benchmark")
+    print("  NET: Neuromorphic Event Triage — Final Benchmark")
     print("=" * 64)
 
     # 1. Dataset
@@ -80,7 +80,7 @@ def run_benchmark():
         'metrics': compare(events, adaptive_mask, sensor_size, duration_s, signal_mask, method_name="Adaptive NET")
     }
     
-    # Save trace for Phase 5 verification
+    # Save trace
     from src.controller import plot_adaptation_trace
     plot_adaptation_trace(logs, os.path.join('results', 'adaptive_k_trace.png'))
 
@@ -104,6 +104,23 @@ def run_benchmark():
         results['Tonic'] = None
         print("      (Skipped due to missing dependency)")
 
+    # Save to file because stdout is unreliable in agent environment
+    summary_path = os.path.join('results', 'benchmark_summary.md')
+    with open(summary_path, 'w') as f:
+        f.write("# Benchmark Results\n\n")
+        methods = [k for k in results.keys() if results[k] is not None]
+        for m in methods:
+            metrics = results[m]['metrics']
+            f.write(f"## {m}\n")
+            f.write(f"- **Time**: {results[m]['time_ms']:.2f} ms\n")
+            f.write(f"- **Events**: {metrics['n_raw']:,} → {metrics['n_filtered']:,}\n")
+            f.write(f"- **Reduction**: {metrics['reduction_pct']:.2f}%\n")
+            f.write(f"- **SNR Improvement**: {metrics['snr_improvement_db']:.2f} dB\n")
+            f.write(f"- **Signal Kept**: {metrics['signal_kept_pct']:.2f}%\n")
+            f.write(f"- **Noise Leaked**: {metrics['noise_leaked_pct']:.2f}%\n\n")
+            
+    print(f"\n[NET] Results saved to {summary_path}")
+    
     # ----------------------------------------------------------------
     # Visualization
     # ----------------------------------------------------------------
@@ -117,39 +134,11 @@ def plot_comparison(results):
     snr_imp = [results[m]['metrics']['snr_improvement_db'] for m in methods]
     
     # Energy Efficiency (Approximate metric: Events Processed / Time)
-    # Normalized to the slowest method (likely Tonic, or Static if Tonic missing)
     throughput = [results[m]['metrics']['n_raw'] / (results[m]['time_ms']/1000) for m in methods]
     efficiency = [t / min(throughput) for t in throughput]
     
     x = np.arange(len(methods))
-    width = 0.25
     
-    fig, ax1 = plt.subplots(figsize=(10, 6), facecolor='#0d1117')
-    ax1.set_facecolor('#0d1117')
-    
-    # Bar 1: Latency (Left Axis)
-    ax1.bar(x - width, latency, width, label='Latency (ms)', color='#ff006e', alpha=0.9)
-    ax1.set_ylabel('Latency (ms)', color='#ff006e', fontweight='bold')
-    ax1.tick_params(axis='y', labelcolor='#ff006e', colors='white')
-    ax1.set_yscale('log')
-    
-    # Bar 2: SNR Improvement (Right Axis)
-    ax2 = ax1.twinx()
-    ax2.bar(x, snr_imp, width, label='SNR Imp (dB)', color='#00d4ff', alpha=0.9)
-    ax2.set_ylabel('SNR Improvement (dB)', color='#00d4ff', fontweight='bold')
-    ax2.tick_params(axis='y', labelcolor='#00d4ff', colors='white')
-    
-    # Bar 3: Efficiency (Right Axis - offset)
-    # To avoid clutter, maybe just 2 metrics? Or verify if user wanted Efficiency plotted.
-    # User asked for: "Latency, SNR Improvement, and Energy Efficiency"
-    # We can plot Efficiency on a 3rd axis or just scale it. 
-    # Let's simple normalize Efficiency to max SNR range for visualization or use a separate subplot?
-    # A grouped bar chart is requested. Let's try to fit it on the secondary axis or just print it.
-    # Actually, simpler: 3 subplots or just bars side-by-side with different scales?
-    # Given the request for "Comparison bar chart", let's do 3 bars per group and normalize y-axis? NO, units differ.
-    
-    # Solution: Three subplots matching the "Science Robotics" style
-    plt.close(fig)
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), facecolor='#0d1117')
     
     metrics_cfg = [

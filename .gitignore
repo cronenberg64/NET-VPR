@@ -25,7 +25,6 @@ env/
 # Data & Results (generated, not tracked)
 data/raw/*.hdf5
 data/processed/*.hdf5
-results/*.png
 results/*.csv
 results/*.json
 

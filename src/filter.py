@@ -400,7 +400,7 @@ def _generate_labeled_dataset(n_signal=100_000, storm_rate=0.6,
 
 if __name__ == '__main__':
     print("=" * 64)
-    print("  NET — Phase 3: Spatio-Temporal Poisson Filter Benchmark")
+    print("  NET — Spatio-Temporal Poisson Filter Benchmark")
     print("=" * 64)
 
     HDF5_PATH = os.path.join('data', 'raw', 'sample_events.hdf5')

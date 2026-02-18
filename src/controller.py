@@ -141,7 +141,12 @@ class AdaptiveEventController:
         return final_events, logs
 
     def _update_control_logic(self, chunk, duration_s):
-        """Hysteresis & Damping logic updates self.current_k."""
+        """Hysteresis & Damping logic updates self.current_k.
+        
+        Strategy: Fast-Tighten, Slow-Relax.
+        - Increase K immediately if density spikes.
+        - Decrease K only if density remains low for 2 consecutive chunks.
+        """
         epps = compute_epps(chunk, self.resolution, duration_s)
         
         target_k = 2
@@ -152,18 +157,23 @@ class AdaptiveEventController:
             
         # Logic
         if target_k > self.current_k:
-            # Attack: Instant increase
+            # Fast-Tighten: Instant increase
             self.current_k = target_k
             self.consecutive_low_density = 0
             
         elif target_k < self.current_k:
-            # Decay: Require damping (2 chunks)
+            # Slow-Relax: Require damping (2 chunks)
             self.consecutive_low_density += 1
             if self.consecutive_low_density >= 2:
                 self.current_k = target_k # Drop down
                 self.consecutive_low_density = 0
         else:
-            # Steady state
+            # Steady state, reset counter if we are maintaining high K? 
+            # Actually if we are at high K and target is high K, we are not "low density".
+            # If target_k == current_k, we just stay.
+            # But if we were waiting to drop and inputs spiked again, we should reset?
+            # If target match current, and current > 2, it means we are in storm.
+            # So yes, reset damping counter.
             self.consecutive_low_density = 0
 
 
@@ -228,10 +238,10 @@ def plot_adaptation_trace(logs: List[ControlLog], save_path: str):
 # ============================================================================
 
 if __name__ == '__main__':
-    from src.filter import compare, _generate_labeled_dataset
+    from src.core.filter import compare, _generate_labeled_dataset
     
     print("="*60)
-    print("  NET Phase 4: Adaptive Controller Benchmark")
+    print("  NET: Adaptive Controller Benchmark")
     print("="*60)
     
     # 1. Generate Data
